@@ -320,6 +320,7 @@
     <div class="h-title">Guía de campo <span>· TUUA</span></div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="pathChip"></div>
+      <button class="h-menu" id="langBtn" onclick="toggleLang()" aria-label="Idioma / Language">EN</button>
       <button class="h-menu" onclick="goTo('welcome')" aria-label="Inicio">🏠</button>
       <button class="h-menu" id="menuBtn" onclick="openSheet()" aria-label="Datos y exportar">⋯</button>
     </div>
@@ -375,7 +376,7 @@ const NODES = {
     ],
     opts:[
       {label:"Sí, sabía que debía pagar", ic:"✓", cls:"green", go:"start"},
-      {label:"No sabía que debía pagar", ic:"C", cls:"amber", go:"C"},
+      {label:"No, no sabía que debía pagar", ic:"C", cls:"amber", go:"C"},
     ]
   },
 
@@ -617,6 +618,261 @@ const FRICTION_LABEL = {
 };
 let session = null;
 
+/* ================== IDIOMA (ES / EN) ================== */
+let LANG = localStorage.getItem('tuua_lang') || null;
+function t(s){ return (LANG==='en' && EN[s]) ? EN[s] : s; }
+function setLang(l){ LANG=l; localStorage.setItem('tuua_lang',l); history=['welcome']; newSession(); render(); }
+function toggleLang(){ LANG = (LANG==='en')?'es':'en'; localStorage.setItem('tuua_lang',LANG); render(); }
+function applyStaticLang(){
+  const ht=document.querySelector('.h-title'); if(ht) ht.innerHTML = t("Guía de campo")+' <span>· TUUA</span>';
+  const bb=document.getElementById('backBtn'); if(bb) bb.textContent = t("← Atrás");
+  const hm=document.querySelector('.botbar .home'); if(hm) hm.textContent = t("↺ Nuevo pasajero");
+  const lb=document.getElementById('langBtn'); if(lb) lb.textContent = (LANG==='en')?'ES':'EN';
+}
+function renderLang(){
+  const app=document.getElementById("app");
+  app.innerHTML = `
+    <div class="step welcome">
+      <div class="hero-badge">🌐</div>
+      <h1 class="hero-title">Idioma · Language</h1>
+      <p class="hero-sub">Elige el idioma de la guía. · Choose the guide language.</p>
+      <button class="big-action primary" onclick="setLang('es')"><span class="ic">🇪🇸</span><span class="tx">Español<small>Continuar en español</small></span><span class="arw">→</span></button>
+      <button class="big-action" onclick="setLang('en')"><span class="ic">🇬🇧</span><span class="tx">English<small>Continue in English</small></span><span class="arw">→</span></button>
+    </div>`;
+  updateChrome();
+}
+
+/* Diccionario ES → EN (las claves deben coincidir EXACTO con el texto en español). */
+const EN = {
+  // Cabecera / navegación / genéricos
+  "Guía de campo":"Field guide",
+  "← Atrás":"← Back",
+  "↺ Nuevo pasajero":"↺ New passenger",
+  "Toca la respuesta del pasajero para avanzar":"Tap the passenger's answer to continue",
+  "Toca una opción para empezar":"Tap an option to start",
+  "Paso previo · Contexto":"Previous step · Context",
+  "Entrevista finalizada":"Interview finished",
+  "Tamizaje":"Screening",
+  "Tip.":"Tip.",
+  "Nota rápida…":"Quick note…",
+  "Muéstrale esta pantalla para ubicar dónde se trabó":"Show them this screen to pinpoint where they got stuck",
+  // Bienvenida
+  "Guía de campo TUUA":"TUUA Field Guide",
+  "Entrevistas de intercept a pasajeros sobre el pago de la TUUA de Transferencia. Toca la respuesta del pasajero y la guía te dice qué preguntar.":"Intercept interviews with passengers about the Transfer TUUA payment. Tap the passenger's answer and the guide tells you what to ask.",
+  "Nueva entrevista":"New interview",
+  "Empieza a registrar un nuevo pasajero":"Start recording a new passenger",
+  "Ver respuestas":"View responses",
+  "Aún no hay entrevistas guardadas":"No interviews saved yet",
+  "Accesos rápidos":"Quick links",
+  "Los datos se guardan en este equipo y funcionan sin conexión.":"Data is saved on this device and works offline.",
+  "Probar plataforma (UAT)":"Test platform (UAT)",
+  "Testear las pantallas de pago":"Test the payment screens",
+  "Pago TUUA (oficial)":"TUUA payment (official)",
+  "Página real de pago — la del QR":"Real payment page — the QR one",
+  "Vuelos internacionales":"International flights",
+  "Llegadas que vienen del extranjero":"Arrivals coming from abroad",
+  // Contexto
+  "Antes de empezar":"Before we start",
+  "Contexto del pasajero":"Passenger context",
+  "Datos opcionales, sin identificar a la persona.":"Optional data, without identifying the person.",
+  "País de origen":"Country of origin",
+  "¿De dónde viene?":"Where are you coming from?",
+  "País de destino":"Destination country",
+  "¿A dónde va?":"Where are you going?",
+  "Tiempo de conexión":"Layover time",
+  "Ej. escala de 2 h":"e.g. 2 h layover",
+  "Continuar":"Continue",
+  // Pantalla de éxito
+  "Respuesta guardada exitosamente":"Response saved successfully",
+  "Se guardó en este equipo. Recuerda exportar al final de la jornada.":"Saved on this device. Remember to export at the end of the day.",
+  "Se guardó y se envió a Google Sheets.":"Saved and sent to Google Sheets.",
+  "Se guardó en este equipo. Se enviará a la nube cuando vuelva la conexión.":"Saved on this device. It will be sent to the cloud when the connection is back.",
+  "Nuevo pasajero":"New passenger",
+  "Registrar otra entrevista":"Record another interview",
+  "Ir al inicio":"Go to home",
+  "Ver respuestas o salir":"View responses or exit",
+  // Panel ⋯
+  "Entrevistas de la jornada":"Interviews of the day",
+  "Sin entrevistas guardadas todavía.":"No interviews saved yet.",
+  "Solo en este equipo (Google Sheets no configurado).":"Only on this device (Google Sheets not configured).",
+  "Sincronizar ahora":"Sync now",
+  "Sube las entrevistas pendientes a la nube":"Upload pending interviews to the cloud",
+  "Exportar CSV":"Export CSV",
+  "Una fila por entrevista, para Excel/Sheets":"One row per interview, for Excel/Sheets",
+  "Exportar JSON":"Export JSON",
+  "Datos completos para análisis":"Full data for analysis",
+  "Borrar todo":"Delete all",
+  "Elimina las entrevistas guardadas en este equipo":"Deletes the interviews saved on this device",
+  "Cerrar":"Close",
+  // Tamizaje
+  "Bloque 0 · Tamizaje":"Block 0 · Screening",
+  "¿Sabía que debía pagar la TUUA de Transferencia?":"Did you know you had to pay the Transfer TUUA?",
+  "Todos en esta zona ya pagaron; interesa si lo sabían de antes.":"Everyone in this area already paid; we want to know if they knew beforehand.",
+  "¿Cómo se enteró de que debía pagar la TUUA?":"How did you find out you had to pay the TUUA?",
+  "¿En qué momento y por qué medio (aerolínea, control, etc.)?":"At what moment and through which channel (airline, checkpoint, etc.)?",
+  "Sí, sabía que debía pagar":"Yes, I knew I had to pay",
+  "No, no sabía que debía pagar":"No, I didn't know I had to pay",
+  // Inicio / start
+  "Inicio · ya pasaron el control":"Start · already past the checkpoint",
+  "¿Cómo hizo su pago de la TUUA?":"How did you pay your TUUA?",
+  "Todos los que abordas ya pagaron. Esto define el camino.":"Everyone you approach already paid. This defines the path.",
+  "Digital — pagó por la web":"Digital — paid on the web",
+  "Presencial — módulo / counter":"In person — kiosk / counter",
+  "No está seguro / otra persona pagó":"Not sure / someone else paid",
+  // Digital branch
+  "Pagó digital":"Paid digitally",
+  "¿Cómo le fue con el pago por la web?":"How did the web payment go for you?",
+  "Pregunta primero cómo le fue, sin inducir.":"Ask first how it went, without leading.",
+  "Le fue fácil, sin problemas":"It was easy, no problems",
+  "Tuvo dificultad / reintentó / casi lo deja":"Had trouble / retried / almost gave up",
+  // Presencial branch
+  "Pagó presencial":"Paid in person",
+  "¿Sabía que podía pagar por la web?":"Did you know you could pay on the web?",
+  "Aquí está el foco de esta zona: por qué no usaron la web.":"This is the focus of this area: why they didn't use the web.",
+  "No sabía que existía la web":"I didn't know the web existed",
+  "Sabía, pero prefirió el módulo":"I knew, but preferred the kiosk",
+  // otro
+  "Caso especial":"Special case",
+  "Ubica el caso con una pregunta":"Locate the case with one question",
+  "Según responda, elige el camino.":"Based on the answer, choose the path.",
+  "¿Quién hizo el pago y cómo? (usted, un familiar, la agencia…)":"Who made the payment and how? (you, a relative, the agency…)",
+  "Si lo hizo otra persona, agradece y cierra suave; si lo hizo la persona, encamínala.":"If someone else did it, thank them and close gently; if the person did it, guide them.",
+  "Al final fue digital":"In the end it was digital",
+  "Al final fue presencial":"In the end it was in person",
+  "Mejor cerrar la entrevista":"Better to close the interview",
+  // Camino C
+  "CAMINO C":"PATH C",
+  "No sabía que debía pagar":"Didn't know they had to pay",
+  "Ya sabemos cómo se enteró; ahora, ¿conoce la web de pago?":"We already know how they found out; now, do they know the payment website?",
+  "¿Sabe que hay una página web donde puede pagar la TUUA?":"Do you know there's a website where you can pay the TUUA?",
+  "Según responda, elige abajo.":"Based on the answer, choose below.",
+  "Sí sabía de la web":"Yes, I knew about the web",
+  "No sabía de la web":"I didn't know about the web",
+  "Si sabe de la web, muéstrale la página. Si no, continúa al Camino D.":"If they know the web, show them the page. If not, continue to Path D.",
+  // Camino A
+  "CAMINO A":"PATH A",
+  "Pagó por internet sin problema":"Paid online without problems",
+  "Grupo de contraste — interesa qué funcionó bien.":"Contrast group — we want to know what worked well.",
+  "¿Cómo se enteró de que podía pagar por internet?":"How did you find out you could pay online?",
+  "¿Qué le generó confianza para hacerlo?":"What made you feel confident to do it?",
+  "Cuénteme cómo fue el proceso de pago.":"Tell me how the payment process was.",
+  "Del 1 al 5, ¿qué tan fácil le pareció?":"From 1 to 5, how easy did it seem?",
+  "¿La experiencia fue amigable?":"Was the experience friendly?",
+  "¿Cuánto tiempo aprox. le tomó?":"About how long did it take you?",
+  "¿Hubo algún momento en que dudó?":"Was there a moment you hesitated?",
+  "Si sí → salta a la sonda de esa pantalla (Camino B).":"If yes → jump to that screen's probe (Path B).",
+  "¿Le llegó el comprobante al correo sin problema?":"Did the receipt arrive to your email without problems?",
+  "¿Recomendaría la plataforma a otros pasajeros?":"Would you recommend the platform to other passengers?",
+  "Cierra con agradecimiento. Si mencionó una pantalla difícil, puedes profundizar con las sondas de B.":"Close with thanks. If they mentioned a difficult screen, you can go deeper with the B probes.",
+  "Ir al cierre":"Go to closing",
+  "Profundizar en una pantalla →":"Go deeper on a screen →",
+  // Camino B
+  "CAMINO B · PRIORIDAD":"PATH B · PRIORITY",
+  "Tuvo fricción en el pago":"Had friction with the payment",
+  "Deje que narre con calma. Luego ubique la pantalla donde se trabó.":"Let them narrate calmly. Then locate the screen where they got stuck.",
+  "Apertura — dejar narrar":"Opening — let them narrate",
+  "Cuénteme cómo fue el proceso de pago por internet.":"Tell me how the online payment process was.",
+  "¿En qué momento se complicó o abandonó?":"At what point did it get complicated or you gave up?",
+  "¿En qué pantalla tuvo más problemas, no se entendió, o demoró la carga?":"On which screen did you have the most trouble, it was unclear, or it loaded slowly?",
+  "Ahora identifica la pantalla y toca abajo para ver solo esa sonda.":"Now identify the screen and tap below to see only that probe.",
+  "Elegir la pantalla donde se trabó →":"Choose the screen where they got stuck →",
+  "CAMINO B · SONDAS":"PATH B · PROBES",
+  "¿En qué pantalla se trabó?":"Which screen did they get stuck on?",
+  "Usa solo la sonda de la pantalla donde tuvo el problema.":"Use only the probe for the screen where they had the problem.",
+  "Primera impresión":"First impression",
+  "Aviso inicial (“soy ese tipo de pasajero”)":"Initial notice (“I'm that type of passenger”)",
+  "Datos personales y vuelo":"Personal and flight data",
+  "Datos / correo":"Data / email",
+  "Pago con tarjeta":"Card payment",
+  "Ir al cierre del caso →":"Go to case closing →",
+  "SONDA 1":"PROBE 1",
+  "SONDA 2":"PROBE 2",
+  "SONDA 3":"PROBE 3",
+  "SONDA 4":"PROBE 4",
+  "SONDA 5":"PROBE 5",
+  "Cuando entró, ¿entendió qué era la tarifa y por qué pagarla?":"When you entered, did you understand what the fee was and why to pay it?",
+  "¿Le dio confianza pagar ahí?":"Did you feel confident paying there?",
+  "Si no le dio confianza: ¿qué fue lo que no se la generó?":"If you weren't confident: what didn't give you confidence?",
+  "¿Qué necesitaría para sentir más confianza?":"What would you need to feel more confident?",
+  "¿Qué le costó entender en esta pantalla?":"What was hard to understand on this screen?",
+  "← Otra pantalla":"← Another screen",
+  "Cierre del caso →":"Case closing →",
+  "¿Le generó alguna duda cuando vio este aviso?":"Did this notice raise any doubts when you saw it?",
+  "¿Fueron dudas sobre si le tocaba pagar?":"Were the doubts about whether you had to pay?",
+  "Al entrar, ¿le queda claro por dónde empezar?":"When you enter, is it clear where to start?",
+  "¿Qué completaría primero y por qué?":"What would you fill in first and why?",
+  "¿Le parece más fácil buscar su vuelo o escanear el boarding pass?":"Is it easier to search for your flight or scan the boarding pass?",
+  "Si busca vuelo: ¿sabe dónde encontrar su nº de vuelo y fecha?":"If searching for the flight: do you know where to find your flight number and date?",
+  "¿Esos datos bastan para encontrar el vuelo? Si no, ¿qué otros ayudarían?":"Are those details enough to find the flight? If not, which others would help?",
+  "Si escanea: ¿lo tiene impreso o digital? ¿Por qué?":"If scanning: do you have it printed or digital? Why?",
+  "Digital obliga a capturar pantalla y buscar en galería — más complicado.":"Digital forces a screenshot and searching the gallery — more complicated.",
+  "¿Qué le generó dudas en esta pantalla?":"What raised doubts on this screen?",
+  "¿Los datos que pedían fueron claros?":"Was the requested data clear?",
+  "¿Hubo algún campo que no supo cómo llenar?":"Was there any field you didn't know how to fill in?",
+  "¿Le dio confianza ingresar los datos de su tarjeta?":"Did you feel confident entering your card details?",
+  "¿Su tarjeta fue aceptada? ¿Le apareció algún mensaje de rechazo?":"Was your card accepted? Did any decline message appear?",
+  "¿Desearía otros métodos de pago? ¿Cuáles?":"Would you want other payment methods? Which ones?",
+  "Cierre del caso":"Case closing",
+  "Al final, ¿cómo realizó el pago?":"In the end, how did you make the payment?",
+  "¿En counter, lo reintentó, alguien más lo hizo?":"At the counter, retried, someone else did it?",
+  "¿Qué modificaría del proceso para que fuera más fácil?":"What would you change in the process to make it easier?",
+  "En su próximo viaje, ¿pagaría por la web o en counter?":"On your next trip, would you pay on the web or at the counter?",
+  "Si tiene tiempo, puedes mostrarle el nuevo Home (prototipo) para recoger comentarios.":"If there's time, you can show them the new Home (prototype) to gather feedback.",
+  "Cierre final →":"Final closing →",
+  // Camino D
+  "CAMINO D":"PATH D",
+  "Explícale la web y mide si la usaría.":"Explain the web and gauge whether they'd use it.",
+  "Le cuento: existe una web para pagar la TUUA.":"Let me tell you: there's a website to pay the TUUA.",
+  "Puede pagar desde su país de origen y llegar a Lima sin hacer cola.":"You can pay from your home country and arrive in Lima without queuing.",
+  "¿La usaría?":"Would you use it?",
+  "Si dice sí → puede enseñarle la página para que la conozca.":"If they say yes → you can show them the page so they get to know it.",
+  "Si dice que NO la usaría, continúa al Camino E para entender por qué.":"If they say they would NOT use it, continue to Path E to understand why.",
+  "No la usaría → Camino E":"Would not use it → Path E",
+  "Sí la usaría → cierre":"Would use it → closing",
+  // Camino E
+  "CAMINO E":"PATH E",
+  "No usó la web / se fue a counter":"Didn't use the web / went to counter",
+  "El insight clave de esta zona: por qué prefieren el módulo.":"The key insight of this area: why they prefer the kiosk.",
+  "¿Por qué prefiere pagar de forma presencial?":"Why do you prefer to pay in person?",
+  "Entender el beneficio real para el cliente.":"Understand the real benefit for the customer.",
+  "¿Qué esperaría encontrar en la web para animarse?":"What would you expect to find on the web to encourage you?",
+  "¿Qué le daría más confianza para usarla?":"What would give you more confidence to use it?",
+  "¿Un descuento lo animaría a pagar por la web la próxima vez?":"Would a discount encourage you to pay on the web next time?",
+  "Opcional · El descuento sería únicamente para pagos por la web (hipótesis de Javier / LAP).":"Optional · The discount would be only for web payments (Javier / LAP hypothesis).",
+  "La pregunta del descuento es opcional (hipótesis de Javier: incentivar el pago por la web).":"The discount question is optional (Javier's hypothesis: encourage web payment).",
+  "Observación de uso (opcional) →":"Usage observation (optional) →",
+  // Shadowing
+  "SHADOWING":"SHADOWING",
+  "Observación de uso (opcional)":"Usage observation (optional)",
+  "Solo si el pasajero acepta y tiene tiempo. Abre la plataforma de prueba, pídele que intente pagar, y anota lo que observas desde tu vista.":"Only if the passenger agrees and has time. Open the test platform, ask them to try to pay, and note what you observe from your view.",
+  "🧪 Abrir plataforma de prueba (UAT)":"🧪 Open test platform (UAT)",
+  "Anota lo que observas":"Note what you observe",
+  "Al entrar, ¿ubica fácilmente por dónde empezar?":"When they enter, do they easily find where to start?",
+  "¿Duda en la primera pantalla?":"Do they hesitate on the first screen?",
+  "¿Prefiere buscar su vuelo o escanear el boarding pass? ¿Le resulta claro?":"Do they prefer to search their flight or scan the boarding pass? Is it clear to them?",
+  "¿En qué pantalla se traba, duda o demora más?":"On which screen do they get stuck, hesitate, or take longest?",
+  "¿Logra llegar hasta el pago sin ayuda? ¿Dónde necesitó apoyo?":"Do they reach the payment without help? Where did they need support?",
+  "Comentarios espontáneos del pasajero mientras usa la plataforma.":"Spontaneous comments from the passenger while using the platform.",
+  "Del 1 al 5, ¿qué tan fácil se le vio usar la plataforma?":"From 1 to 5, how easy did they seem to find using the platform?",
+  "Facilidad de uso observada.":"Observed ease of use.",
+  "Bloque opcional. Si el pasajero no puede o no quiere, toca “Omitir shadowing”.":"Optional block. If the passenger can't or won't, tap “Skip shadowing”.",
+  "Omitir shadowing":"Skip shadowing",
+  "Continuar al cierre →":"Continue to closing →",
+  // Cierre
+  "CIERRE":"CLOSING",
+  "Para todos":"For everyone",
+  "Impacto en el consumo + pregunta abierta final.":"Impact on spending + final open question.",
+  "Ahora que pagó la TUUA, ¿piensa hacer algún consumo o compra en el aeropuerto?":"Now that you paid the TUUA, do you plan to spend or buy anything at the airport?",
+  "Restaurantes, Duty Free, tiendas…":"Restaurants, Duty Free, shops…",
+  "Si no hubiera pagado la TUUA, ¿habría hecho algún consumo o compra en el aeropuerto?":"If you hadn't paid the TUUA, would you have spent or bought anything at the airport?",
+  "Hipótesis de LAP (Javier).":"LAP hypothesis (Javier).",
+  "¿Comprará menos en el aeropuerto por haber pagado la TUUA?":"Will you buy less at the airport because you paid the TUUA?",
+  "Impacto de la TUUA en el gasto.":"Impact of the TUUA on spending.",
+  "¿Hay algo más que mejoraría del proceso de pago?":"Is there anything else you would improve about the payment process?",
+  "Agradece por su tiempo y desea buen viaje.":"Thank them for their time and wish them a good trip.",
+  "Finalizar entrevista ✓":"Finish interview ✓",
+};
+
 /* ================== SINCRONIZACIÓN CON GOOGLE SHEETS ==================
    Pega aquí la URL del Web App de Google Apps Script (termina en /exec).
    Mientras no la pegues, la app funciona 100% local (offline).
@@ -686,10 +942,11 @@ let syncTimer = null;
 function scheduleSync(){ clearTimeout(syncTimer); syncTimer = setTimeout(syncAll, 1500); }
 function updateSync(){
   const el = document.getElementById('syncStatus'); if(!el) return;
-  if(!sheetsReady()){ el.textContent = 'Solo en este equipo (Google Sheets no configurado).'; el.className='sync-status off'; return; }
+  const es = LANG!=='en';
+  if(!sheetsReady()){ el.textContent = t('Solo en este equipo (Google Sheets no configurado).'); el.className='sync-status off'; return; }
   const pending = loadAll().filter(s=>!s._synced).length;
-  if(!navigator.onLine){ el.textContent = 'Sin conexión — '+pending+' por subir cuando vuelva la señal.'; el.className='sync-status warn'; return; }
-  el.textContent = pending>0 ? ('Subiendo a Google Sheets… '+pending+' pendiente'+(pending>1?'s':'')+'.') : 'Todo enviado a Google Sheets ✓';
+  if(!navigator.onLine){ el.textContent = es ? ('Sin conexión — '+pending+' por subir cuando vuelva la señal.') : ('Offline — '+pending+' to upload when the signal returns.'); el.className='sync-status warn'; return; }
+  el.textContent = pending>0 ? (es ? ('Subiendo a Google Sheets… '+pending+' pendiente'+(pending>1?'s':'')+'.') : ('Uploading to Google Sheets… '+pending+' pending.')) : (es ? 'Todo enviado a Google Sheets ✓' : 'All sent to Google Sheets ✓');
   el.className = pending>0 ? 'sync-status warn' : 'sync-status ok';
 }
 
@@ -701,11 +958,11 @@ const RESOURCES = [
 ];
 function accesosBig(){
   return RESOURCES.map(r=>`<a class="big-action link" href="${r.url}" target="_blank" rel="noopener">
-    <span class="ic">${r.ic}</span><span class="tx">${r.title}<small>${r.sub}</small></span><span class="arw">↗</span></a>`).join('');
+    <span class="ic">${r.ic}</span><span class="tx">${t(r.title)}<small>${t(r.sub)}</small></span><span class="arw">↗</span></a>`).join('');
 }
 function accesosAct(){
   return RESOURCES.map(r=>`<a class="act" href="${r.url}" target="_blank" rel="noopener">
-    <span class="ic">${r.ic}</span><span>${r.title}<small>${r.sub}</small></span></a>`).join('');
+    <span class="ic">${r.ic}</span><span>${t(r.title)}<small>${t(r.sub)}</small></span></a>`).join('');
 }
 
 function newSession(){
@@ -769,9 +1026,21 @@ function updateCount(){
   const btn = document.getElementById('menuBtn');
   if(btn) btn.innerHTML = n>0 ? '⋯<span class="h-count">'+n+'</span>' : '⋯';
   const sub = document.getElementById('sheetSub');
-  if(sub) sub.textContent = n>0 ? (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':'')+' en este equipo.') : 'Sin entrevistas guardadas todavía.';
+  if(sub) sub.textContent = n>0 ? (LANG==='en' ? (n+' interview'+(n>1?'s':'')+' saved on this device.') : (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':'')+' en este equipo.')) : t('Sin entrevistas guardadas todavía.');
 }
 function openSheet(){
+  const es = LANG!=='en';
+  document.getElementById('sheet').innerHTML = `
+    <h2>${es?'Entrevistas de la jornada':'Interviews of the day'}</h2>
+    <p class="sub" id="sheetSub"></p>
+    <p class="sync-status off" id="syncStatus"></p>
+    <button class="act" onclick="syncAll()"><span class="ic">☁</span><span>${es?'Sincronizar ahora':'Sync now'}<small>${es?'Sube las entrevistas pendientes a la nube':'Upload pending interviews to the cloud'}</small></span></button>
+    <button class="act" onclick="exportData('csv')"><span class="ic">⬇</span><span>${es?'Exportar CSV':'Export CSV'}<small>${es?'Una fila por entrevista, para Excel/Sheets':'One row per interview, for Excel/Sheets'}</small></span></button>
+    <button class="act" onclick="exportData('json')"><span class="ic">{ }</span><span>${es?'Exportar JSON':'Export JSON'}<small>${es?'Datos completos para análisis':'Full data for analysis'}</small></span></button>
+    <button class="act danger" onclick="clearData()"><span class="ic">🗑</span><span>${es?'Borrar todo':'Delete all'}<small>${es?'Elimina las entrevistas guardadas en este equipo':'Deletes the interviews saved on this device'}</small></span></button>
+    <div class="section-label" style="margin:16px 2px 8px">${es?'Accesos rápidos':'Quick links'}</div>
+    <div id="sheetAccesos"></div>
+    <button class="close" onclick="closeSheet()">${es?'Cerrar':'Close'}</button>`;
   updateCount(); updateSync(); syncAll();
   document.getElementById('sheetAccesos').innerHTML = accesosAct();
   document.getElementById('backdrop').classList.add('on');
@@ -792,7 +1061,7 @@ function stamp(){
 }
 function exportData(kind){
   const all = loadAll();
-  if(!all.length){ alert('No hay entrevistas para exportar todavía.'); return; }
+  if(!all.length){ alert(LANG==='en'?'No interviews to export yet.':'No hay entrevistas para exportar todavía.'); return; }
   if(kind==='json'){
     download('tuua_entrevistas_'+stamp()+'.json', JSON.stringify(all,null,2), 'application/json');
     return;
@@ -813,7 +1082,7 @@ function exportData(kind){
   download('tuua_entrevistas_'+stamp()+'.csv', '﻿'+rows.join('\r\n'), 'text/csv;charset=utf-8');
 }
 function clearData(){
-  if(!confirm('¿Borrar TODAS las entrevistas guardadas en este equipo? Esta acción no se puede deshacer.')) return;
+  if(!confirm(LANG==='en'?'Delete ALL interviews saved on this device? This cannot be undone.':'¿Borrar TODAS las entrevistas guardadas en este equipo? Esta acción no se puede deshacer.')) return;
   saveAll([]); updateCount(); closeSheet();
 }
 
@@ -834,25 +1103,25 @@ function renderWelcome(){
   app.innerHTML = `
     <div class="step welcome">
       <div class="hero-badge">✈️</div>
-      <h1 class="hero-title">Guía de campo TUUA</h1>
-      <p class="hero-sub">Entrevistas de intercept a pasajeros sobre el pago de la TUUA de Transferencia. Toca la respuesta del pasajero y la guía te dice qué preguntar.</p>
+      <h1 class="hero-title">${t("Guía de campo TUUA")}</h1>
+      <p class="hero-sub">${t("Entrevistas de intercept a pasajeros sobre el pago de la TUUA de Transferencia. Toca la respuesta del pasajero y la guía te dice qué preguntar.")}</p>
 
       <button class="big-action primary" onclick="startInterview()">
         <span class="ic">＋</span>
-        <span class="tx">Nueva entrevista<small>Empieza a registrar un nuevo pasajero</small></span>
+        <span class="tx">${t("Nueva entrevista")}<small>${t("Empieza a registrar un nuevo pasajero")}</small></span>
         <span class="arw">→</span>
       </button>
 
       <button class="big-action" onclick="openSheet()">
         <span class="ic">📋</span>
-        <span class="tx">Ver respuestas<small>${n>0 ? (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':'')) : 'Aún no hay entrevistas guardadas'}</small></span>
+        <span class="tx">${t("Ver respuestas")}<small>${n>0 ? (LANG==='en' ? (n+' interview'+(n>1?'s':'')+' saved') : (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':''))) : t('Aún no hay entrevistas guardadas')}</small></span>
         <span class="arw">→</span>
       </button>
 
-      <div class="section-label">Accesos rápidos</div>
+      <div class="section-label">${t("Accesos rápidos")}</div>
       ${accesosBig()}
 
-      <p class="hero-foot">Los datos se guardan en este equipo y funcionan sin conexión.</p>
+      <p class="hero-foot">${t("Los datos se guardan en este equipo y funcionan sin conexión.")}</p>
     </div>`;
   updateChrome();
 }
@@ -863,29 +1132,29 @@ function renderContext(){
   const app = document.getElementById("app");
   app.innerHTML = `
     <div class="step">
-      <div class="eyebrow">Antes de empezar</div>
-      <h1 class="q">Contexto del pasajero</h1>
-      <p class="q-sub">Datos opcionales, sin identificar a la persona.</p>
+      <div class="eyebrow">${t("Antes de empezar")}</div>
+      <h1 class="q">${t("Contexto del pasajero")}</h1>
+      <p class="q-sub">${t("Datos opcionales, sin identificar a la persona.")}</p>
 
       <div class="field">
-        <label>País de origen</label>
-        <input value="${escapeAttr(m.origen)}" placeholder="¿De dónde viene?"
+        <label>${t("País de origen")}</label>
+        <input value="${escapeAttr(m.origen)}" placeholder="${t("¿De dónde viene?")}"
                oninput="session.meta.origen=this.value;persist()">
       </div>
 
       <div class="field">
-        <label>País de destino</label>
-        <input value="${escapeAttr(m.destino)}" placeholder="¿A dónde va?"
+        <label>${t("País de destino")}</label>
+        <input value="${escapeAttr(m.destino)}" placeholder="${t("¿A dónde va?")}"
                oninput="session.meta.destino=this.value;persist()">
       </div>
 
       <div class="field">
-        <label>Tiempo de conexión</label>
-        <input value="${escapeAttr(m.conexion)}" placeholder="Ej. escala de 2 h"
+        <label>${t("Tiempo de conexión")}</label>
+        <input value="${escapeAttr(m.conexion)}" placeholder="${t("Ej. escala de 2 h")}"
                oninput="session.meta.conexion=this.value;persist()">
       </div>
 
-      <button class="next" onclick="goTo('tamizaje')">Continuar <span>→</span></button>
+      <button class="next" onclick="goTo('tamizaje')">${t("Continuar")} <span>→</span></button>
     </div>`;
   updateChrome();
 }
@@ -894,24 +1163,24 @@ function renderContext(){
 function renderDone(){
   const app = document.getElementById("app");
   let msg;
-  if(!sheetsReady()) msg = "Se guardó en este equipo. Recuerda exportar al final de la jornada.";
-  else if(navigator.onLine) msg = "Se guardó y se envió a Google Sheets.";
-  else msg = "Se guardó en este equipo. Se enviará a la nube cuando vuelva la conexión.";
+  if(!sheetsReady()) msg = t("Se guardó en este equipo. Recuerda exportar al final de la jornada.");
+  else if(navigator.onLine) msg = t("Se guardó y se envió a Google Sheets.");
+  else msg = t("Se guardó en este equipo. Se enviará a la nube cuando vuelva la conexión.");
   app.innerHTML = `
     <div class="step welcome done">
       <div class="hero-badge ok">✓</div>
-      <h1 class="hero-title">Respuesta guardada exitosamente</h1>
+      <h1 class="hero-title">${t("Respuesta guardada exitosamente")}</h1>
       <p class="hero-sub">${msg}</p>
 
       <button class="big-action primary" onclick="startInterview()">
         <span class="ic">＋</span>
-        <span class="tx">Nuevo pasajero<small>Registrar otra entrevista</small></span>
+        <span class="tx">${t("Nuevo pasajero")}<small>${t("Registrar otra entrevista")}</small></span>
         <span class="arw">→</span>
       </button>
 
       <button class="big-action" onclick="goHome()">
         <span class="ic">⌂</span>
-        <span class="tx">Ir al inicio<small>Ver respuestas o salir</small></span>
+        <span class="tx">${t("Ir al inicio")}<small>${t("Ver respuestas o salir")}</small></span>
         <span class="arw">→</span>
       </button>
     </div>`;
@@ -921,6 +1190,7 @@ function renderDone(){
 
 function render(){
   const id = history[history.length-1];
+  if(id==="lang"){ renderLang(); return; }
   if(id==="welcome"){ renderWelcome(); return; }
   if(id==="context"){ renderContext(); return; }
   if(id==="done"){ renderDone(); return; }
@@ -930,22 +1200,22 @@ function render(){
 
   // banner de camino
   if(n.banner){
-    html += `<div class="path-banner ${n.banner.cls}"><span class="tag">${n.banner.tag}</span>${n.banner.txt}</div>`;
+    html += `<div class="path-banner ${n.banner.cls}"><span class="tag">${t(n.banner.tag)}</span>${t(n.banner.txt)}</div>`;
   }
-  if(n.eyebrow) html += `<div class="eyebrow">${n.eyebrow}</div>`;
-  if(n.kicker) html += `<div class="kicker">${n.kicker}</div>`;
-  if(n.q) html += `<h1 class="q">${n.q}</h1>`;
-  if(n.sub) html += `<p class="q-sub">${n.sub}</p>`;
-  if(n.section) html += `<div class="section-label">${n.section}</div>`;
+  if(n.eyebrow) html += `<div class="eyebrow">${t(n.eyebrow)}</div>`;
+  if(n.kicker) html += `<div class="kicker">${t(n.kicker)}</div>`;
+  if(n.q) html += `<h1 class="q">${t(n.q)}</h1>`;
+  if(n.sub) html += `<p class="q-sub">${t(n.sub)}</p>`;
+  if(n.section) html += `<div class="section-label">${t(n.section)}</div>`;
 
   // captura de la pantalla (sondas del camino B)
   if(n.img && SHOTS[n.img]){
-    html += `<div class="shot"><img src="${SHOTS[n.img]}" alt="Pantalla" loading="lazy"><div class="shot-cap">Muéstrale esta pantalla para ubicar dónde se trabó</div></div>`;
+    html += `<div class="shot"><img src="${SHOTS[n.img]}" alt="Pantalla" loading="lazy"><div class="shot-cap">${t("Muéstrale esta pantalla para ubicar dónde se trabó")}</div></div>`;
   }
 
   // botón de enlace externo (ej. abrir plataforma UAT en otra pestaña)
   if(n.link){
-    html += `<a class="uat-link" href="${n.link.url}" target="_blank" rel="noopener">${n.link.label} <span>↗</span></a>`;
+    html += `<a class="uat-link" href="${n.link.url}" target="_blank" rel="noopener">${t(n.link.label)} <span>↗</span></a>`;
   }
 
   // lista de preguntas a leer
@@ -962,8 +1232,8 @@ function render(){
         }
         cap += `</div>`;
       }
-      cap += `<textarea placeholder="Nota rápida…" oninput="saveText('${id}',${i},this)">${stored.t?escapeHtml(stored.t):''}</textarea>`;
-      html += `<div class="ask"><div class="n">${i+1}</div><div class="txt">${a.t}${a.s?`<em>${a.s}</em>`:''}<div class="cap">${cap}</div></div></div>`;
+      cap += `<textarea placeholder="${t("Nota rápida…")}" oninput="saveText('${id}',${i},this)">${stored.t?escapeHtml(stored.t):''}</textarea>`;
+      html += `<div class="ask"><div class="n">${i+1}</div><div class="txt">${t(a.t)}${a.s?`<em>${t(a.s)}</em>`:''}<div class="cap">${cap}</div></div></div>`;
     });
     html += `</div>`;
   }
@@ -973,25 +1243,25 @@ function render(){
     html += `<div class="opts">`;
     n.opts.forEach(o=>{
       html += `<button class="opt ${o.cls||''}" onclick="goTo('${o.go}')">
-        <span class="ic">${o.ic||'›'}</span><span>${o.label}</span><span class="arw">›</span></button>`;
+        <span class="ic">${o.ic||'›'}</span><span>${t(o.label)}</span><span class="arw">›</span></button>`;
     });
     html += `</div>`;
   }
 
   // nota / tip
   if(n.tip){
-    html += `<div class="note tip">💡<div><b>Tip.</b> ${n.tip}</div></div>`;
+    html += `<div class="note tip">💡<div><b>${t("Tip.")}</b> ${t(n.tip)}</div></div>`;
   }
 
   // botones de avance
   if(n.jump){
-    html += `<button class="next ghost" onclick="goTo('${n.jump.go}')">${n.jump.label}</button>`;
+    html += `<button class="next ghost" onclick="goTo('${n.jump.go}')">${t(n.jump.label)}</button>`;
   }
   if(n.next){
-    html += `<button class="next" onclick="goTo('${n.next.go}')">${n.next.label}</button>`;
+    html += `<button class="next" onclick="goTo('${n.next.go}')">${t(n.next.label)}</button>`;
   }
   if(n.back){
-    html += `<button class="next ghost" onclick="goTo('${n.back.go}')">${n.back.label}</button>`;
+    html += `<button class="next ghost" onclick="goTo('${n.back.go}')">${t(n.back.label)}</button>`;
   }
 
   html += `</div>`;
@@ -1007,28 +1277,32 @@ function updateChrome(){
   const crumb = document.getElementById("crumb");
   const botbar = document.querySelector(".botbar");
 
-  // La barra inferior se oculta en bienvenida y en la pantalla de éxito
-  botbar.style.display = (id==="welcome" || id==="done") ? "none" : "flex";
+  applyStaticLang();
+
+  // La barra inferior se oculta en idioma, bienvenida y pantalla de éxito
+  botbar.style.display = (id==="welcome" || id==="done" || id==="lang") ? "none" : "flex";
 
   // Pantallas especiales (sin nodo)
   if(!n){
     chip.innerHTML = "";
-    if(id==="welcome"){ crumb.textContent = "Toca una opción para empezar"; }
-    else if(id==="context"){ crumb.innerHTML = `Paso previo · <b>Contexto</b>`; }
-    else if(id==="done"){ crumb.innerHTML = `<b>Entrevista finalizada</b>`; }
+    if(id==="welcome"){ crumb.textContent = t("Toca una opción para empezar"); }
+    else if(id==="context"){ crumb.innerHTML = `${t("Paso previo · Contexto")}`; }
+    else if(id==="done"){ crumb.innerHTML = `<b>${t("Entrevista finalizada")}</b>`; }
+    else { crumb.textContent = ""; }
     document.getElementById("backBtn").disabled = history.length<=1;
     return;
   }
 
   const letter = id.startsWith("A")?"A":id.startsWith("B")?"B":id==="C"?"C":id==="D"?"D":id==="E"?"E":"";
-  chip.innerHTML = letter ? `<span class="chip">Camino ${letter}</span>` : "";
-  if(n.banner){ crumb.innerHTML = `<b>${n.banner.txt}</b>`; }
-  else if(n.q){ crumb.innerHTML = `Paso actual · <b>${n.eyebrow||'Tamizaje'}</b>`; }
-  else { crumb.textContent = "Toca la respuesta del pasajero para avanzar"; }
+  const caminoWord = (LANG==='en')?'Path':'Camino';
+  chip.innerHTML = letter ? `<span class="chip">${caminoWord} ${letter}</span>` : "";
+  if(n.banner){ crumb.innerHTML = `<b>${t(n.banner.txt)}</b>`; }
+  else if(n.q){ crumb.innerHTML = `${LANG==='en'?'Current step · ':'Paso actual · '}<b>${t(n.eyebrow||'Tamizaje')}</b>`; }
+  else { crumb.textContent = t("Toca la respuesta del pasajero para avanzar"); }
   document.getElementById("backBtn").disabled = history.length<=1;
 }
 
-const VIRTUAL = ["welcome","context","done"];
+const VIRTUAL = ["welcome","context","done","lang"];
 function goTo(id){
   if(!NODES[id] && !VIRTUAL.includes(id)) return;
   history.push(id);
@@ -1048,7 +1322,7 @@ function reset(){
 
 /* ---------- Arranque ---------- */
 newSession();
-history = ["welcome"];
+history = LANG ? ["welcome"] : ["lang"];   // primero elige idioma si aún no lo hizo
 updateCount();
 render();
 
