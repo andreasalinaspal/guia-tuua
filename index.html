@@ -557,7 +557,7 @@ let session = null;
    Pega aquí la URL del Web App de Google Apps Script (termina en /exec).
    Mientras no la pegues, la app funciona 100% local (offline).
    Ver SETUP-SHEETS.md para crear la hoja y el script.                  */
-const SHEETS_URL = 'PEGA_AQUI_LA_URL_DEL_WEB_APP';   // ej: https://script.google.com/macros/s/AKfy.../exec
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwWPjYn10pDjFz5MMAdxZxemha0AseV_xrdnEryiUY3RP68_8-tTTdWdzp7y81ccFWJJg/exec';
 
 function sheetsReady(){
   return typeof SHEETS_URL==='string' && /^https:\/\/script\.google\.com\//.test(SHEETS_URL) && !SHEETS_URL.includes('PEGA');
