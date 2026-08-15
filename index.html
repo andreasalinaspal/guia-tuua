@@ -369,7 +369,10 @@ const NODES = {
   tamizaje: {
     eyebrow:"Bloque 0 · Tamizaje",
     q:"¿Sabía que debía pagar la TUUA de Transferencia?",
-    sub:"Si no sabe qué es la TUUA, explícale brevemente antes de continuar.",
+    sub:"Todos en esta zona ya pagaron; interesa si lo sabían de antes.",
+    ask:[
+      {t:"¿Cómo se enteró de que debía pagar la TUUA?", s:"¿En qué momento y por qué medio (aerolínea, control, etc.)?"},
+    ],
     opts:[
       {label:"Sí, sabía que debía pagar", ic:"✓", cls:"green", go:"start"},
       {label:"No sabía que debía pagar", ic:"C", cls:"amber", go:"C"},
@@ -379,9 +382,8 @@ const NODES = {
   /* ======= CAMINO C — No sabía que debía pagar ======= */
   C: {
     banner:{cls:"amber", tag:"CAMINO C", txt:"No sabía que debía pagar"},
-    kicker:"Entender cómo se enteró y si conoce la web de pago.",
+    kicker:"Ya sabemos cómo se enteró; ahora, ¿conoce la web de pago?",
     ask:[
-      {t:"¿Cómo se enteró de que tenía que pagar la tarifa TUUA? ¿En qué momento fue?"},
       {t:"¿Sabe que hay una página web donde puede pagar la TUUA?", s:"Según responda, elige abajo."},
     ],
     opts:[
