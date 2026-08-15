@@ -314,8 +314,8 @@
     <div class="h-title">Guía de campo <span>· TUUA</span></div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="pathChip"></div>
-      <button class="h-menu" onclick="goTo('welcome')" aria-label="Inicio">⌂</button>
-      <button class="h-menu" onclick="openSheet()" aria-label="Datos y exportar">⋯</button>
+      <button class="h-menu" onclick="goTo('welcome')" aria-label="Inicio">🏠</button>
+      <button class="h-menu" id="menuBtn" onclick="openSheet()" aria-label="Datos y exportar">⋯</button>
     </div>
   </div>
   <div class="h-crumb" id="crumb">Toca la respuesta del pasajero para avanzar</div>
@@ -542,7 +542,8 @@ const NODES = {
     kicker:"Impacto en el consumo + pregunta abierta final.",
     ask:[
       {t:"Ahora que pagó la TUUA, ¿piensa hacer algún consumo o compra en el aeropuerto?", s:"Restaurantes, Duty Free, tiendas…"},
-      {t:"Si no hubiera pagado la TUUA, ¿habría hecho algún consumo o compra? ¿Comprará menos por haberla pagado?", s:"Hipótesis de LAP (Javier): impacto de la TUUA en el gasto."},
+      {t:"Si no hubiera pagado la TUUA, ¿habría hecho algún consumo o compra en el aeropuerto?", s:"Hipótesis de LAP (Javier)."},
+      {t:"¿Comprará menos en el aeropuerto por haber pagado la TUUA?", s:"Impacto de la TUUA en el gasto."},
       {t:"¿Hay algo más que mejoraría del proceso de pago?"},
     ],
     tip:"Agradece por su tiempo y desea buen viaje.",
@@ -712,7 +713,7 @@ function fmtAnswers(s){
 /* ---------- Panel / exportación ---------- */
 function updateCount(){
   const n = loadAll().length;
-  const btn = document.querySelector('.h-menu');
+  const btn = document.getElementById('menuBtn');
   if(btn) btn.innerHTML = n>0 ? '⋯<span class="h-count">'+n+'</span>' : '⋯';
   const sub = document.getElementById('sheetSub');
   if(sub) sub.textContent = n>0 ? (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':'')+' en este equipo.') : 'Sin entrevistas guardadas todavía.';
