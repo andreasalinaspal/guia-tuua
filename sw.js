@@ -1,0 +1,46 @@
+/* Service worker — Guía de campo TUUA
+   Estrategia: precache del app-shell + cache-first para todo (offline-first).
+   Sube CACHE cada vez que cambies index.html u otros assets. */
+const CACHE = 'tuua-guia-v4';
+
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/maskable-192.png',
+  './icons/maskable-512.png',
+  './icons/apple-touch-icon.png'
+];
+
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+
+  e.respondWith(
+    caches.match(req).then((hit) => {
+      if (hit) return hit;
+      return fetch(req).then((res) => {
+        // Cachea al vuelo lo que se pueda (incluye Google Fonts) para uso offline posterior.
+        const copy = res.clone();
+        if (res.ok && (res.type === 'basic' || res.type === 'cors')) {
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      }).catch(() => caches.match('./index.html'));
+    })
+  );
+});
