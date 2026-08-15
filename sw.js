@@ -1,17 +1,17 @@
 /* Service worker — Guía de campo TUUA
    Estrategia: precache del app-shell + cache-first para todo (offline-first).
    Sube CACHE cada vez que cambies index.html u otros assets. */
-const CACHE = 'tuua-guia-v4';
+const CACHE = 'tuua-guia-v5';
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/maskable-192.png',
-  './icons/maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icon-192.png',
+  './icon-512.png',
+  './maskable-192.png',
+  './maskable-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {
