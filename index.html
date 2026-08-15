@@ -286,6 +286,8 @@
   .big-action.primary .arw{color:#fff;opacity:.8;}
   .big-action.primary .ic{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;}
   .hero-foot{font-size:12.5px;color:var(--grey);text-align:center;margin-top:20px;opacity:.85;}
+  .big-action.link, a.act{text-decoration:none;}
+  .big-action.link .arw{font-size:17px;}
 
   /* ---- Campos apilados (contexto y formularios) ---- */
   .field{margin-bottom:16px;}
@@ -311,6 +313,7 @@
     <div class="h-title">Guía de campo <span>· TUUA</span></div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="pathChip"></div>
+      <button class="h-menu" onclick="goTo('welcome')" aria-label="Inicio">⌂</button>
       <button class="h-menu" onclick="openSheet()" aria-label="Datos y exportar">⋯</button>
     </div>
   </div>
@@ -328,6 +331,8 @@
   <button class="act" onclick="exportData('csv')"><span class="ic">⬇</span><span>Exportar CSV<small>Una fila por entrevista, para Excel/Sheets</small></span></button>
   <button class="act" onclick="exportData('json')"><span class="ic">{ }</span><span>Exportar JSON<small>Datos completos para análisis</small></span></button>
   <button class="act danger" onclick="clearData()"><span class="ic">🗑</span><span>Borrar todo<small>Elimina las entrevistas guardadas en este equipo</small></span></button>
+  <div class="section-label" style="margin:16px 2px 8px">Accesos rápidos</div>
+  <div id="sheetAccesos"></div>
   <button class="close" onclick="closeSheet()">Cerrar</button>
 </div>
 
@@ -631,6 +636,21 @@ function updateSync(){
   el.className = pending>0 ? 'sync-status warn' : 'sync-status ok';
 }
 
+/* ---------- Accesos rápidos (links útiles al entrevistar) ---------- */
+const RESOURCES = [
+  { ic:"🧪", title:"Probar plataforma (UAT)", sub:"Testear las pantallas de pago", url:"https://calm-island-09623e40f.2.azurestaticapps.net/" },
+  { ic:"💳", title:"Pago TUUA (oficial)", sub:"Página real de pago — la del QR", url:"https://pagotuua.lima-airport.com/" },
+  { ic:"🛬", title:"Vuelos internacionales", sub:"Llegadas que vienen del extranjero", url:"https://share.google/KsY47jf9gTL3LYB5X" },
+];
+function accesosBig(){
+  return RESOURCES.map(r=>`<a class="big-action link" href="${r.url}" target="_blank" rel="noopener">
+    <span class="ic">${r.ic}</span><span class="tx">${r.title}<small>${r.sub}</small></span><span class="arw">↗</span></a>`).join('');
+}
+function accesosAct(){
+  return RESOURCES.map(r=>`<a class="act" href="${r.url}" target="_blank" rel="noopener">
+    <span class="ic">${r.ic}</span><span>${r.title}<small>${r.sub}</small></span></a>`).join('');
+}
+
 function newSession(){
   session = { id:Date.now(), start:new Date().toISOString(), updated:null,
               meta:{origen:'', destino:'', conexion:''}, trail:['context'], friction:null, answers:{} };
@@ -694,7 +714,12 @@ function updateCount(){
   const sub = document.getElementById('sheetSub');
   if(sub) sub.textContent = n>0 ? (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':'')+' en este equipo.') : 'Sin entrevistas guardadas todavía.';
 }
-function openSheet(){ updateCount(); updateSync(); syncAll(); document.getElementById('backdrop').classList.add('on'); document.getElementById('sheet').classList.add('on'); }
+function openSheet(){
+  updateCount(); updateSync(); syncAll();
+  document.getElementById('sheetAccesos').innerHTML = accesosAct();
+  document.getElementById('backdrop').classList.add('on');
+  document.getElementById('sheet').classList.add('on');
+}
 function closeSheet(){ document.getElementById('backdrop').classList.remove('on'); document.getElementById('sheet').classList.remove('on'); }
 
 function download(name, text, mime){
@@ -766,6 +791,9 @@ function renderWelcome(){
         <span class="tx">Ver respuestas<small>${n>0 ? (n+' entrevista'+(n>1?'s':'')+' guardada'+(n>1?'s':'')) : 'Aún no hay entrevistas guardadas'}</small></span>
         <span class="arw">→</span>
       </button>
+
+      <div class="section-label">Accesos rápidos</div>
+      ${accesosBig()}
 
       <p class="hero-foot">Los datos se guardan en este equipo y funcionan sin conexión.</p>
     </div>`;
