@@ -50,7 +50,8 @@ function doPost(e){
 }
 
 // Chequeo de salud: abre la URL /exec en el navegador y debe responder {"ok":true,...}
-function doGet(){ return json({ ok:true, service:'guia-tuua' }); }
+// version:'wide-1' confirma que corre este código nuevo (columnas por pregunta).
+function doGet(){ return json({ ok:true, service:'guia-tuua', version:'wide-1' }); }
 
 function readHeaders(sheet){
   if(sheet.getLastRow() === 0) return [];

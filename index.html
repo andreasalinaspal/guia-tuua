@@ -262,6 +262,7 @@
     display:flex;align-items:center;justify-content:center;margin-bottom:18px;
     box-shadow:0 8px 22px rgba(11,18,32,.22);
   }
+  .hero-badge.ok{background:var(--green);box-shadow:0 8px 22px rgba(46,125,70,.28);font-size:30px;}
   .hero-title{font-family:'Fraunces',serif;font-size:28px;line-height:1.15;font-weight:600;color:var(--ink);margin:0 0 8px;letter-spacing:-.3px;}
   .hero-sub{font-size:15px;color:var(--grey);margin:0 0 24px;line-height:1.55;}
   .big-action{
@@ -536,7 +537,8 @@ const NODES = {
     ask:[
       {t:"¿Hay algo más que mejoraría del proceso de pago?"},
     ],
-    tip:"Agradece por su tiempo y desea buen viaje. Toca \u201CNuevo pasajero\u201D para reiniciar.",
+    tip:"Agradece por su tiempo y desea buen viaje.",
+    next:{go:"done", label:"Finalizar entrevista \u2713"},
     end:true
   },
 
@@ -736,7 +738,12 @@ function clearData(){
 /* ---------- Pantalla de bienvenida ---------- */
 function startInterview(){
   newSession();
-  history.push("context");
+  history = ["welcome","context"];
+  render();
+}
+function goHome(){
+  newSession();
+  history = ["welcome"];
   render();
 }
 function renderWelcome(){
@@ -798,10 +805,40 @@ function renderContext(){
   updateChrome();
 }
 
+/* ---------- Pantalla de éxito (entrevista finalizada) ---------- */
+function renderDone(){
+  const app = document.getElementById("app");
+  let msg;
+  if(!sheetsReady()) msg = "Se guardó en este equipo. Recuerda exportar al final de la jornada.";
+  else if(navigator.onLine) msg = "Se guardó y se envió a Google Sheets.";
+  else msg = "Se guardó en este equipo. Se enviará a la nube cuando vuelva la conexión.";
+  app.innerHTML = `
+    <div class="step welcome done">
+      <div class="hero-badge ok">✓</div>
+      <h1 class="hero-title">Respuesta guardada exitosamente</h1>
+      <p class="hero-sub">${msg}</p>
+
+      <button class="big-action primary" onclick="startInterview()">
+        <span class="ic">＋</span>
+        <span class="tx">Nuevo pasajero<small>Registrar otra entrevista</small></span>
+        <span class="arw">→</span>
+      </button>
+
+      <button class="big-action" onclick="goHome()">
+        <span class="ic">⌂</span>
+        <span class="tx">Ir al inicio<small>Ver respuestas o salir</small></span>
+        <span class="arw">→</span>
+      </button>
+    </div>`;
+  syncAll();          // empuja la entrevista finalizada a la nube
+  updateChrome();
+}
+
 function render(){
   const id = history[history.length-1];
   if(id==="welcome"){ renderWelcome(); return; }
   if(id==="context"){ renderContext(); return; }
+  if(id==="done"){ renderDone(); return; }
   const n = NODES[id];
   const app = document.getElementById("app");
   let html = `<div class="step">`;
@@ -880,14 +917,15 @@ function updateChrome(){
   const crumb = document.getElementById("crumb");
   const botbar = document.querySelector(".botbar");
 
-  // La barra inferior se oculta en la bienvenida
-  botbar.style.display = (id==="welcome") ? "none" : "flex";
+  // La barra inferior se oculta en bienvenida y en la pantalla de éxito
+  botbar.style.display = (id==="welcome" || id==="done") ? "none" : "flex";
 
   // Pantallas especiales (sin nodo)
   if(!n){
     chip.innerHTML = "";
     if(id==="welcome"){ crumb.textContent = "Toca una opción para empezar"; }
     else if(id==="context"){ crumb.innerHTML = `Paso previo · <b>Contexto</b>`; }
+    else if(id==="done"){ crumb.innerHTML = `<b>Entrevista finalizada</b>`; }
     document.getElementById("backBtn").disabled = history.length<=1;
     return;
   }
@@ -900,10 +938,11 @@ function updateChrome(){
   document.getElementById("backBtn").disabled = history.length<=1;
 }
 
+const VIRTUAL = ["welcome","context","done"];
 function goTo(id){
-  if(!NODES[id]) return;
+  if(!NODES[id] && !VIRTUAL.includes(id)) return;
   history.push(id);
-  session.trail.push(id);
+  if(session) session.trail.push(id);
   if(/^B_s[1-5]$/.test(id)) session.friction = id;
   persist();
   render();
