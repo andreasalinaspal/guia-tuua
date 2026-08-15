@@ -1,7 +1,7 @@
 /* Service worker — Guía de campo TUUA
    Estrategia: precache del app-shell + cache-first para todo (offline-first).
    Sube CACHE cada vez que cambies index.html u otros assets. */
-const CACHE = 'tuua-guia-v12';
+const CACHE = 'tuua-guia-v13';
 
 const ASSETS = [
   './',
