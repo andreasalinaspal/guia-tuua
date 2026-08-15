@@ -288,6 +288,12 @@
   .big-action.primary .ic{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;}
   .hero-foot{font-size:12.5px;color:var(--grey);text-align:center;margin-top:20px;opacity:.85;}
   .big-action.link, a.act{text-decoration:none;}
+  .uat-link{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;font-family:inherit;font-size:16px;font-weight:700;text-decoration:none;
+    background:var(--blue);color:#fff;border-radius:14px;padding:15px;margin:2px 0 16px;
+  }
+  .uat-link:active{transform:scale(.99);}
   .big-action.link .arw{font-size:17px;}
 
   /* ---- Campos apilados (contexto y formularios) ---- */
@@ -521,7 +527,7 @@ const NODES = {
     ],
     tip:"Si dice que NO la usaría, continúa al Camino E para entender por qué.",
     next:{go:"E", label:"No la usaría → Camino E"},
-    jump:{go:"cierre", label:"Sí la usaría → cierre"}
+    jump:{go:"shadowing", label:"Sí la usaría → observación"}
   },
 
   /* ======= CAMINO E ======= */
@@ -534,7 +540,24 @@ const NODES = {
       {t:"¿Un descuento lo animaría a pagar por la web la próxima vez?", s:"Opcional · El descuento sería únicamente para pagos por la web (hipótesis de Javier / LAP)."},
     ],
     tip:"La pregunta del descuento es opcional (hipótesis de Javier: incentivar el pago por la web).",
-    next:{go:"cierre", label:"Cierre final →"}
+    next:{go:"shadowing", label:"Observación de uso (opcional) →"}
+  },
+
+  /* ======= SHADOWING (solo presencial: no usó/pagó por la web) ======= */
+  shadowing: {
+    banner:{cls:"purp", tag:"SHADOWING", txt:"Observación de uso (opcional)"},
+    kicker:"Solo si el pasajero acepta y tiene tiempo. Abre la plataforma de prueba, pídele que intente pagar, y anota lo que observas desde tu vista.",
+    link:{ url:"https://calm-island-09623e40f.2.azurestaticapps.net/", label:"🧪 Abrir plataforma de prueba (UAT)" },
+    section:"Anota lo que observas",
+    ask:[
+      {t:"Al entrar, ¿ubica fácilmente por dónde empezar?", s:"¿Duda en la primera pantalla?"},
+      {t:"¿Prefiere buscar su vuelo o escanear el boarding pass? ¿Le resulta claro?"},
+      {t:"¿En qué pantalla se traba, duda o demora más?"},
+      {t:"¿Logra llegar hasta el pago sin ayuda? ¿Dónde necesitó apoyo?"},
+      {t:"Comentarios espontáneos del pasajero mientras usa la plataforma."},
+    ],
+    tip:"Bloque opcional. Si el pasajero no puede o no quiere, continúa al cierre.",
+    next:{go:"cierre", label:"Continuar al cierre →"}
   },
 
   cierre: {
@@ -888,6 +911,11 @@ function render(){
   // captura de la pantalla (sondas del camino B)
   if(n.img && SHOTS[n.img]){
     html += `<div class="shot"><img src="${SHOTS[n.img]}" alt="Pantalla" loading="lazy"><div class="shot-cap">Muéstrale esta pantalla para ubicar dónde se trabó</div></div>`;
+  }
+
+  // botón de enlace externo (ej. abrir plataforma UAT en otra pestaña)
+  if(n.link){
+    html += `<a class="uat-link" href="${n.link.url}" target="_blank" rel="noopener">${n.link.label} <span>↗</span></a>`;
   }
 
   // lista de preguntas a leer
