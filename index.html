@@ -365,6 +365,32 @@ const NODES = {
     ]
   },
 
+  /* Tamizaje: ¿sabía que debía pagar? → No = Camino C */
+  tamizaje: {
+    eyebrow:"Bloque 0 · Tamizaje",
+    q:"¿Sabía que debía pagar la TUUA de Transferencia?",
+    sub:"Si no sabe qué es la TUUA, explícale brevemente antes de continuar.",
+    opts:[
+      {label:"Sí, sabía que debía pagar", ic:"✓", cls:"green", go:"start"},
+      {label:"No sabía que debía pagar", ic:"C", cls:"amber", go:"C"},
+    ]
+  },
+
+  /* ======= CAMINO C — No sabía que debía pagar ======= */
+  C: {
+    banner:{cls:"amber", tag:"CAMINO C", txt:"No sabía que debía pagar"},
+    kicker:"Entender cómo se enteró y si conoce la web de pago.",
+    ask:[
+      {t:"¿Cómo se enteró de que tenía que pagar la tarifa TUUA? ¿En qué momento fue?"},
+      {t:"¿Sabe que hay una página web donde puede pagar la TUUA?", s:"Según responda, elige abajo."},
+    ],
+    opts:[
+      {label:"Sí sabía de la web", ic:"🌐", cls:"green", go:"cierre"},
+      {label:"No sabía de la web", ic:"D", cls:"purp", go:"D"},
+    ],
+    tip:"Si sabe de la web, muéstrale la página. Si no, continúa al Camino D."
+  },
+
   /* rama DIGITAL: ¿fácil o con fricción? */
   digital: {
     eyebrow:"Pagó digital",
@@ -555,8 +581,10 @@ const NODES = {
       {t:"¿En qué pantalla se traba, duda o demora más?"},
       {t:"¿Logra llegar hasta el pago sin ayuda? ¿Dónde necesitó apoyo?"},
       {t:"Comentarios espontáneos del pasajero mientras usa la plataforma."},
+      {t:"Del 1 al 5, ¿qué tan fácil se le vio usar la plataforma?", s:"Facilidad de uso observada."},
     ],
-    tip:"Bloque opcional. Si el pasajero no puede o no quiere, continúa al cierre.",
+    tip:"Bloque opcional. Si el pasajero no puede o no quiere, toca “Omitir shadowing”.",
+    jump:{go:"cierre", label:"Omitir shadowing"},
     next:{go:"cierre", label:"Continuar al cierre →"}
   },
 
@@ -716,7 +744,7 @@ function saveScale(node,i,val,btn){
 
 function caminoLetters(s){
   const seen=[]; s.trail.forEach(id=>{
-    const l = id.startsWith('A')?'A':id.startsWith('B')?'B':id==='D'?'D':id==='E'?'E':'';
+    const l = id.startsWith('A')?'A':id.startsWith('B')?'B':id==='C'?'C':id==='D'?'D':id==='E'?'E':'';
     if(l && !seen.includes(l)) seen.push(l);
   }); return seen.join('+');
 }
@@ -855,7 +883,7 @@ function renderContext(){
                oninput="session.meta.conexion=this.value;persist()">
       </div>
 
-      <button class="next" onclick="goTo('start')">Continuar <span>→</span></button>
+      <button class="next" onclick="goTo('tamizaje')">Continuar <span>→</span></button>
     </div>`;
   updateChrome();
 }
@@ -990,7 +1018,7 @@ function updateChrome(){
     return;
   }
 
-  const letter = id.startsWith("A")?"A":id.startsWith("B")?"B":id==="D"?"D":id==="E"?"E":"";
+  const letter = id.startsWith("A")?"A":id.startsWith("B")?"B":id==="C"?"C":id==="D"?"D":id==="E"?"E":"";
   chip.innerHTML = letter ? `<span class="chip">Camino ${letter}</span>` : "";
   if(n.banner){ crumb.innerHTML = `<b>${n.banner.txt}</b>`; }
   else if(n.q){ crumb.innerHTML = `Paso actual · <b>${n.eyebrow||'Tamizaje'}</b>`; }
